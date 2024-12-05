@@ -1100,36 +1100,50 @@ int calcularPagamento(Symbol s1, Symbol s2, Symbol s3);
 Symbol determinarSimbolo(const uint16_t* imagem);
 
 void Verdinho() {
-  for (int i = 0; i < 10; i++) { // Piscar 10 vezes
-    digitalWrite(ledG, HIGH); // Liga o verde
-    delay(100);               // Espera 100ms
-    digitalWrite(ledG, LOW);  // Desliga o verde
-    delay(100);               // Espera 100ms
+  unsigned long startTime = millis();
+  const unsigned long duration = 1000; // Total de 10 piscadas (100ms ON + 100ms OFF)
+
+  while (millis() - startTime < duration) {
+    digitalWrite(ledG, HIGH); // Liga o LED
+    tone(BUZZER_PIN, 1000, 100); // Emite som por 100ms
+    delay(100);
+    digitalWrite(ledG, LOW); // Desliga o LED
+    delay(100);
   }
 }
 
 void Jackpot() {
-  for (int i = 0; i < 10; i++) { // Repetir 10 vezes
-    digitalWrite(ledR, HIGH); // Liga o vermelho
-    digitalWrite(ledG, LOW);  // Desliga o verde
-    digitalWrite(ledB, LOW);  // Desliga o azul
-    delay(100);               // Espera 100ms
+  const int numCycles = 10; // Quantidade de ciclos de troca de cores
+  const int colorDuration = 100; // Tempo para cada cor (em milissegundos)
 
-    digitalWrite(ledR, LOW);  // Desliga o vermelho
-    digitalWrite(ledG, HIGH); // Liga o verde
-    digitalWrite(ledB, LOW);  // Desliga o azul
-    delay(100);               // Espera 100ms
+  for (int i = 0; i < numCycles; i++) {
+    // Vermelho
+    digitalWrite(ledR, HIGH);
+    digitalWrite(ledG, LOW);
+    digitalWrite(ledB, LOW);
+    tone(BUZZER_PIN, 800, colorDuration); // Tom correspondente
+    delay(colorDuration);
 
-    digitalWrite(ledR, LOW);  // Desliga o vermelho
-    digitalWrite(ledG, LOW);  // Desliga o verde
-    digitalWrite(ledB, HIGH); // Liga o azul
-    delay(100);               // Espera 100ms
+    // Verde
+    digitalWrite(ledR, LOW);
+    digitalWrite(ledG, HIGH);
+    digitalWrite(ledB, LOW);
+    tone(BUZZER_PIN, 1000, colorDuration); // Tom correspondente
+    delay(colorDuration);
+
+    // Azul
+    digitalWrite(ledR, LOW);
+    digitalWrite(ledG, LOW);
+    digitalWrite(ledB, HIGH);
+    tone(BUZZER_PIN, 1200, colorDuration); // Tom correspondente
+    delay(colorDuration);
   }
-  
-  // Garantir que o LED termine apagado
+
+  // Garantir que todos os LEDs estejam apagados
   digitalWrite(ledR, LOW);
   digitalWrite(ledG, LOW);
   digitalWrite(ledB, LOW);
+  noTone(BUZZER_PIN); // Parar qualquer som restante
 }
 
 // Funções
