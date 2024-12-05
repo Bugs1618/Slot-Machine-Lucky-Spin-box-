@@ -1118,61 +1118,29 @@ Symbol determinarSimbolo(const uint16_t* imagem) {
   return OUTRO;
 }
 long saldo = 100000;
-bool buttonPressed = false;
+
 int apostaInicial = 20;
 const int valoresAposta[] = { 20, 50, 100, 500, 2000, 5000, 10000 };
 int indiceAposta = 0;
 
-
-void setup() {
-  display1.initR(INITR_BLACKTAB);  // Inicializa display 1
-  display2.initR(INITR_BLACKTAB);  // Inicializa display 2
-  display3.initR(INITR_BLACKTAB);  // Inicializa display 3
-
-  // Limpa os displays antes de desenhar as novas imagens
-  display1.fillScreen(ST77XX_BLACK);
-  display2.fillScreen(ST77XX_BLACK);
-  display3.fillScreen(ST77XX_BLACK);
-  
-
-  pinMode(BUTTON_PIN, INPUT);
-  pinMode(BUTTON_PIN2, INPUT);
-  randomSeed(analogRead(A0));
-
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Aposta: ");
-  lcd.print(apostaInicial);
-  lcd.begin(16, 2);  // Configura o LCD para 16 colunas e 2 linhas
-  lcd.setCursor(0, 1);
-  lcd.print("Saldo: ");
-  lcd.print(saldo);  // Mostra o saldo inicial na primeira linha
-
-  while (digitalRead(BUTTON_PIN) == LOW || digitalRead(BUTTON_PIN2) == LOW) {
-    delay(10);  // Aguarda até o botão ser solto (não pressionado)
-  }
-}
-
-void loop() {
+void apostar(){
   if (digitalRead(BUTTON_PIN2) == LOW) {
+    while (digitalRead(BUTTON_PIN2) == HIGH) {
+      delay(50);  // Aguarda o botão ser liberado
+    }
+
     indiceAposta = (indiceAposta + 1) % (sizeof(valoresAposta) / sizeof(valoresAposta[0]));
     apostaInicial = valoresAposta[indiceAposta];
 
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Aposta: ");
-    lcd.print(apostaInicial);
-    lcd.setCursor(0, 1);
-    lcd.print("Saldo: ");
-    lcd.print(saldo);
-
-    while (digitalRead(BUTTON_PIN2) == LOW) {
-      delay(10);  // Aguarda o botão ser liberado
-    }
+    atualizarLCD();
   }
+}
 
-  // Lê o estado do botão
+void Girar(){
   if (digitalRead(BUTTON_PIN) == LOW) {  // Botão pressionado (assumindo pull-up)
+    while (digitalRead(BUTTON_PIN) == HIGH) {
+        delay(50);  // Pequeno atraso para suavizar a detecção
+    }
     if (saldo >= apostaInicial) {
       saldo -= apostaInicial;
       // Gera uma nova imagem aleatória para cada display
@@ -1206,15 +1174,48 @@ void loop() {
       desenharImagem(display2, novaImagem2);
       desenharImagem(display3, novaImagem3);
     
-      while (digitalRead(BUTTON_PIN) == LOW) {
-        delay(10);  // Pequeno atraso para suavizar a detecção
-      }
     } else {
       // Saldo insuficiente
       lcd.clear();
       lcd.setCursor(0, 0);
       lcd.print("Saldo insuficiente!");
-      delay(1000);  // Mostra a mensagem por 1 segundo
+      delay(1000); 
+      atualizarLCD(); // Mostra a mensagem por 1 segundo
     }
   }
+}
+
+void atualizarLCD(){
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Aposta: ");
+  lcd.print(apostaInicial);
+  lcd.setCursor(0, 1);
+  lcd.print("Saldo: ");
+  lcd.print(saldo);
+}
+
+void setup() {
+  display1.initR(INITR_BLACKTAB);  // Inicializa display 1
+  display2.initR(INITR_BLACKTAB);  // Inicializa display 2
+  display3.initR(INITR_BLACKTAB);  // Inicializa display 3
+
+  // Limpa os displays antes de desenhar as novas imagens
+  display1.fillScreen(ST77XX_BLACK);
+  display2.fillScreen(ST77XX_BLACK);
+  display3.fillScreen(ST77XX_BLACK);
+  
+
+  pinMode(BUTTON_PIN, INPUT);
+  pinMode(BUTTON_PIN2, INPUT);
+  randomSeed(analogRead(A0));
+
+  lcd.begin(16, 2);
+  lcd.clear();
+  atualizarLCD();
+}
+
+void loop() {
+  apostar();
+  Girar();
 }
